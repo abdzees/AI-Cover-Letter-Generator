@@ -30,3 +30,5 @@ To run the app locally, you need an API key from **Google Gemini**:
    ```bash
    npm run dev
 6. Open the URL shown in your terminal (usually http://localhost:3000) in your browser.
+
+![App Screenshot](App_Screenshot.png "App Screenshot")
