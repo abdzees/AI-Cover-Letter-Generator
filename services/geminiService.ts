@@ -75,7 +75,7 @@ export const generateCoverLetterBody = async (
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_MODEL_NAME,
       contents: prompt,
-      // config: { temperature: 0.7 } // Optional: Adjust temperature for creativity
+      config: { temperature: 0.7 } // Optional: Adjust temperature for creativity
     });
     
     const text = response.text;
