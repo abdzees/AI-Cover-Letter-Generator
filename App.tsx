@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [jobDescription, setJobDescription] = useState<string>('');
   const [letterHeader, setLetterHeader] = useState<string>('');
   const [generatedLetterBody, setGeneratedLetterBody] = useState<string | null>(null);
+  const [extractedCompanyName, setExtractedCompanyName] = useState<string>('');
   
   const [isGeneratingLetter, setIsGeneratingLetter] = useState<boolean>(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
@@ -37,6 +38,7 @@ const App: React.FC = () => {
     setError(null); // Clear previous errors on new upload
     setGeneratedLetterBody(null); // Clear old letter
     setSuccessMessage(null);
+    setExtractedCompanyName('');
   }, []);
 
   const handleUserNameChange = useCallback((name: string) => {
@@ -65,15 +67,37 @@ const App: React.FC = () => {
     setError(null);
     setSuccessMessage(null);
     setGeneratedLetterBody(null); // Clear previous generation
+    setExtractedCompanyName(''); // Clear previous company name
 
     try {
       const body = await generateCoverLetterBody(cvData.text, jobDescription, letterHeader);
       setGeneratedLetterBody(body);
+
+      // Company Name Extraction Logic
+      let companyName = '';
+      const companyRegex = /(?:Company|Organization):\s*([^
+]+)/i;
+      const companySuffixRegex = /(.+?)\s+(?:Inc\.?|Ltd\.?|LLC|Corp\.?|Corporation|Group|Solutions|Technologies)/i;
+
+      const companyMatch = jobDescription.match(companyRegex);
+      if (companyMatch && companyMatch[1]) {
+        companyName = companyMatch[1].trim();
+      }
+
+      if (!companyName) {
+        const suffixMatch = jobDescription.match(companySuffixRegex);
+        if (suffixMatch && suffixMatch[1]) {
+          companyName = suffixMatch[1].trim();
+        }
+      }
+      setExtractedCompanyName(companyName);
+
       setSuccessMessage('Cover letter generated successfully!');
       setTimeout(() => setSuccessMessage(null), 4000); // Clear success message after a few seconds
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred while generating the letter.');
+      setExtractedCompanyName(''); // Clear on error too
     } finally {
       setIsGeneratingLetter(false);
     }
@@ -87,18 +111,19 @@ const App: React.FC = () => {
     setIsDownloadingPdf(true);
     setPdfError(null);
     try {
-      const bodyParts = [];
-      if (letterHeader) {
-        bodyParts.push(letterHeader);
-      }
-      bodyParts.push(generatedLetterBody);
-      bodyParts.push("Best Regards,");
-      bodyParts.push(userName);
+      const companyForFilename = extractedCompanyName?.trim().replace(/\s+/g, '-') || 'company';
+      const fileName = `cover-letter-${companyForFilename}`;
+      
+      const pdfHeader = letterHeader || '';
+      
+      const greeting = `Dear ${extractedCompanyName || 'Hiring'} Team,\n\n`;
+      const signOff = `\n\nBest Regards,\n${userName}`;
+      const pdfBody = `${greeting}${generatedLetterBody}${signOff}`;
 
       await generatePdfFromText(
-        "Dear Hiring Team,",
-        bodyParts.join('\n\n'), // Join with double newlines for spacing
-        'cover-letter'
+        pdfHeader,
+        pdfBody,
+        fileName
       );
     } catch (err) {
        setPdfError(err instanceof Error ? err.message : 'Failed to download PDF.');
