@@ -5,7 +5,7 @@ import JobInput from './components/JobInput';
 import LetterPreview from './components/LetterPreview';
 import Spinner from './components/Spinner';
 import { generateCoverLetterBody } from './services/geminiService';
-import { generatePdfFromHtmlContent } from './services/pdfUtils';
+import { generatePdfFromText } from './services/pdfUtils';
 import { CVData } from './types';
 import { APP_TITLE } from './constants';
 import { SparklesIcon, AlertTriangleIcon, CheckCircleIcon } from './components/icons';
@@ -87,7 +87,19 @@ const App: React.FC = () => {
     setIsDownloadingPdf(true);
     setPdfError(null);
     try {
-      await generatePdfFromHtmlContent('letter-content-for-pdf', 'cover-letter');
+      const bodyParts = [];
+      if (letterHeader) {
+        bodyParts.push(letterHeader);
+      }
+      bodyParts.push(generatedLetterBody);
+      bodyParts.push("Best Regards,");
+      bodyParts.push(userName);
+
+      await generatePdfFromText(
+        "Dear Hiring Team,",
+        bodyParts.join('\n\n'), // Join with double newlines for spacing
+        'cover-letter'
+      );
     } catch (err) {
        setPdfError(err instanceof Error ? err.message : 'Failed to download PDF.');
     } finally {
