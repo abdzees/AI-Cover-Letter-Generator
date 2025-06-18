@@ -113,9 +113,9 @@ const App: React.FC = () => {
     try {
       const companyForFilename = extractedCompanyName?.trim().replace(/\s+/g, '-') || 'company';
       const fileName = `cover-letter-${companyForFilename}`;
-
+      
       const pdfHeader = letterHeader || '';
-
+      
       const greeting = `Dear ${extractedCompanyName || 'Hiring'} Team,\n\n`;
       const signOff = `\n\nBest Regards,\n${userName}`;
       const pdfBody = `${greeting}${generatedLetterBody}${signOff}`;
