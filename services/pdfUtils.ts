@@ -141,9 +141,9 @@ export const generatePdfFromText = (header: string, body: string, fileName: stri
         currentY = margin;
       }
       pdf.text(line, margin, currentY);
-      currentY += fontSize * lineHeight / 2.83465 * 0.5; // Adjust spacing based on pt to mm and lineheight
+      currentY += (fontSize * lineHeight) * (1 / 2.83465); // Adjust spacing based on pt to mm and lineheight
     });
-    if (isHeader) currentY += (fontSize * lineHeight / 2.83465 * 0.5) * 0.5; // Extra space after header
+    if (isHeader) currentY += (fontSize * lineHeight * 0.5) * (1 / 2.83465); // Extra space after header
   };
 
   if (header.trim()) {
