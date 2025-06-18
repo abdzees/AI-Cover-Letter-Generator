@@ -6,12 +6,11 @@ const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
   console.error("API_KEY environment variable not set.");
-  // preventing API calls if the key is missing.
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY || "MISSING_API_KEY" });
 
-const generatePrompt = (cvText: string, jobDescription: string, letterHeader: string): string => {
+const generatePrompt = (cvText: string, jobDescription: string, letterHeader: string, companyName: string): string => {
   return `
 Act as an expert career advisor, professional writer, and experienced editor. Your task is to generate a concise, sharply written, and highly tailored cover letter based on the user's CV and a specific job description. Refine AI-generated text to sound naturally human and genuinely engaging, always using British English.
 
@@ -41,55 +40,55 @@ Act as an expert career advisor, professional writer, and experienced editor. Yo
 - The final paragraph should be a single strong sentence expressing enthusiasm and readiness to contribute.
 
 ### Structure:
-- Start with a strong, concise first paragraph referencing the job title and aligning motivation with the company’s work.
+- Start with a strong, concise first paragraph referencing the job title and aligning motivation with the company’s work (the company is: ${companyName || 'the target company'}).
 - Middle paragraphs should focus on concrete projects, achievements, or relevant experiences.
-- End with a one-line statement of enthusiasm and the required sign-off.
+- End with a one-line statement of enthusiasm.
 
 ### Important:
-
-- Only generate the main body of the letter (excluding the header or greeting).
+- Only generate the main body of the letter (excluding the header or greeting). The application will add a greeting like "Dear ${companyName || 'Hiring'} Team," before your generated text.
 - Output must be plain text (no markdown).
 - Avoid repeating exact phrases from the CV unless highly relevant.
 - Avoid boilerplate or generic summaries.
 
-### Input:
-
-**Fixed Header (Provided by user, do not repeat this in your output):**
-"""
-${letterHeader || "No fixed header provided by user."}
-"""
+### Input Context:
 
 **CV Content:**
 """
 ${cvText}
 """
 
-**Job Description:**
+**Job Description (for company: ${companyName || 'Not specified'}):**
 """
 ${jobDescription}
 """
 
+**Fixed Header (Provided by user, do not repeat this in your output. This header will appear *before* the greeting and the main body you generate):**
+"""
+${letterHeader || "No fixed header provided by user."}
+"""
+
 ### Output:
-Return only the **body** of the cover letter, starting directly with the first paragraph and ending with the sign-off.
+Return only the **main body** of the cover letter. This means starting with the first paragraph that would typically follow a greeting (e.g., "I am writing to express my keen interest...") and ending with the final concluding sentence before any valediction (like "Best Regards,"). Do not include any greeting, date, addresses, or the final sign-off (e.g., "Best Regards," or user's name).
 `.trim();
 };
 
 export const generateCoverLetterBody = async (
   cvText: string,
   jobDescription: string,
-  letterHeader: string
+  letterHeader: string,
+  companyName: string
 ): Promise<string> => {
   if (!API_KEY) {
     throw new Error("API_KEY is not configured. Please set the API_KEY environment variable.");
   }
 
-  const prompt = generatePrompt(cvText, jobDescription, letterHeader);
+  const prompt = generatePrompt(cvText, jobDescription, letterHeader, companyName);
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_MODEL_NAME,
       contents: prompt,
-      config: { temperature: 0.7 } // Optional: Adjust temperature for creativity
+      // config: { temperature: 0.6 } // Slightly lower temp for more focused output with new detailed prompt
     });
     
     const text = response.text;

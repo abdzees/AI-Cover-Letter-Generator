@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import App from './App.tsx'; // Explicitly add .tsx extension
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Set up pdf.js worker

@@ -1,5 +1,6 @@
 {
   "name": "AI Cover Letter Generator",
   "description": "Generate personalized cover letters using your CV and a job description, powered by Gemini AI. Download the result as a PDF.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "prompt": ""
 }

@@ -1,11 +1,11 @@
 
 import React, { useRef } from 'react';
-import { generatePdfFromHtmlContent } from '../services/pdfUtils'; // Using HTML to PDF for better styling
 import { DownloadIcon, AlertTriangleIcon } from './icons';
 import Spinner from './Spinner';
 
 interface LetterPreviewProps {
   letterHeader: string;
+  companyName: string; // This will now be the auto-extracted name (or empty string)
   generatedLetterBody: string | null;
   userName: string;
   isLoadingPdf: boolean;
@@ -15,6 +15,7 @@ interface LetterPreviewProps {
 
 const LetterPreview: React.FC<LetterPreviewProps> = ({
   letterHeader,
+  companyName,
   generatedLetterBody,
   userName,
   isLoadingPdf,
@@ -24,12 +25,16 @@ const LetterPreview: React.FC<LetterPreviewProps> = ({
   const letterContentRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = async () => {
-    if (!letterContentRef.current || !generatedLetterBody) return;
-    // The onDownloadPdf function will now use 'letter-content-for-pdf' id
     await onDownloadPdf(); 
   };
   
-  if (!generatedLetterBody && !letterHeader) { // Show placeholder if no header and no body
+  // Greeting will use "Hiring Team" if companyName is empty or only whitespace
+  const greeting = `Dear ${companyName.trim() || 'Hiring'} Team,`;
+
+  const showPlaceholder = !generatedLetterBody && !letterHeader.trim() && !companyName.trim();
+
+
+  if (showPlaceholder && !generatedLetterBody) { // Check only for generated body for placeholder if other fields might be briefly empty
     return (
       <div className="p-6 bg-slate-800 rounded-xl shadow-2xl h-full flex flex-col items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-slate-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -46,40 +51,42 @@ const LetterPreview: React.FC<LetterPreviewProps> = ({
       <h2 className="text-2xl font-semibold text-sky-400 mb-6">4. Preview & Download</h2>
       
       <div 
-        id="letter-content-for-pdf" 
+        id="letter-content-for-pdf"
         ref={letterContentRef} 
         className="flex-grow p-6 bg-white text-gray-800 font-serif text-sm leading-relaxed rounded-md shadow-inner overflow-y-auto mb-6 min-h-[400px]"
-        style={{ fontFamily: "'Times New Roman', Times, serif" }} // Classic cover letter font
+        style={{ fontFamily: "'Times New Roman', Times, serif" }}
       >
-        {letterHeader && (
-          <pre className="whitespace-pre-wrap font-serif text-sm">{letterHeader}</pre>
-        )}
-        {(letterHeader && generatedLetterBody) && <div className="h-4"></div>} {/* Spacer if both header and body exist */}
-        
-        {generatedLetterBody && (
-          <pre className="whitespace-pre-wrap font-serif text-sm">{generatedLetterBody}</pre>
+        {letterHeader.trim() && (
+          <pre className="whitespace-pre-wrap font-serif text-sm">{letterHeader.trim()}</pre>
         )}
 
-        {generatedLetterBody && userName && (
+        {(letterHeader.trim()) && <div className="h-4"></div>}
+        
+        <pre className="whitespace-pre-wrap font-serif text-sm">{greeting}</pre>
+        
+        <div className="h-4"></div>
+
+        {generatedLetterBody ? (
+          <pre className="whitespace-pre-wrap font-serif text-sm">{generatedLetterBody.trim()}</pre>
+        ) : (
+             <p className="text-gray-400 font-serif text-sm italic mt-2">Letter body will appear here once generated...</p>
+        )}
+
+        {generatedLetterBody && userName.trim() && (
           <>
-            <div className="h-6"></div> {/* Spacer before sign-off */}
+            <div className="h-6"></div>
             <pre className="whitespace-pre-wrap font-serif text-sm">Best Regards,</pre>
-            <div className="h-2"></div> {/* Small spacer */}
-            <pre className="whitespace-pre-wrap font-serif text-sm">{userName}</pre>
+            <div className="h-2"></div>
+            <pre className="whitespace-pre-wrap font-serif text-sm">{userName.trim()}</pre>
           </>
         )}
-        
-        {/* If only header is present and no body yet, show something or keep it clean */}
-        {!generatedLetterBody && letterHeader && (
-             <p className="text-gray-400 font-serif text-sm italic mt-4">Letter body will appear here once generated...</p>
-        )}
-
       </div>
 
       <button
         onClick={handleDownload}
-        disabled={isLoadingPdf || !generatedLetterBody} // Also disable if no body to download
+        disabled={isLoadingPdf || !generatedLetterBody || !companyName.trim()} // Also disable if no company name for filename
         className="w-full bg-green-500 hover:bg-green-600 disabled:bg-green-800 disabled:text-green-500 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center transition-colors duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
+        aria-label="Download cover letter as PDF"
       >
         {isLoadingPdf ? (
           <>
