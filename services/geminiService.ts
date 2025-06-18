@@ -13,28 +13,42 @@ const ai = new GoogleGenAI({ apiKey: API_KEY || "MISSING_API_KEY" });
 
 const generatePrompt = (cvText: string, jobDescription: string, letterHeader: string): string => {
   return `
-You are an expert career advisor and professional writer.
+Act as an expert career advisor, professional writer, and experienced editor. Your task is to generate a concise, sharply written, and highly tailored cover letter based on the user's CV and a specific job description. Refine AI-generated text to sound naturally human and genuinely engaging, always using British English.
 
-Your task is to generate a **concise, sharply written, and highly tailored cover letter** based on the user's CV and a specific job description.
+### Follow these editorial principles:
+- Replace em dashes with commas or restructure sentences for better flow.
+- Avoid semicolons in casual writing. Use full stops or conjunctions like “and” or “but”.
+- Remove ellipses unless conveying hesitation or a trailing thought.
+- Minimise parenthetical asides by weaving information directly into the main sentence.
+- Use colons sparingly.
+- Eliminate hedging phrases like “however” or “it’s worth noting” – be clear and assertive.
+- Avoid stock transitions such as “furthermore” unless absolutely necessary.
+- Vary repetitive words and phrasing for rhythm.
+- Use contractions in informal or conversational settings.
+- Swap overly formal vocabulary (“utilise”, “ascertain”) for simpler alternatives (“use”, “find out”).
+- Keep language concise and vary sentence length to maintain interest.
+- Allow small imperfections in casual or creative writing.
+- Stay true to the intended meaning, but always adapt tone and register to suit the audience.
 
-### Goals:
-- Keep it short and impactful (target **250–300 words**)
-- Use a **direct and confident tone**
-- Avoid unnecessary adjectives, filler, or robotic-sounding phrases
-- Do **not** list every skill — focus on **key achievements or experiences** directly relevant to the role
+### Cover letter goals:
+- Keep it short and impactful (target 250 to 300 words).
+- Use a direct and confident tone.
+- Avoid unnecessary adjectives, filler, or robotic-sounding phrases.
+- Do not list every skill, focus on key achievements or experiences directly relevant to the role.
 
-### Specific Instructions:
-- If the job description includes a company mission or culture blurb, summarize any reference to it in **one brief line or omit it entirely**.
-- The final paragraph should be **a single strong sentence** expressing enthusiasm and readiness to contribute.
+### Specific instructions:
+- If the job description mentions company mission or culture, reference it in one brief line or omit it.
+- The final paragraph should be a single strong sentence expressing enthusiasm and readiness to contribute.
 
 ### Structure:
-- Begin with a strong, concise first paragraph referencing the job title and aligning motivation with the company's work.
+- Start with a strong, concise first paragraph referencing the job title and aligning motivation with the company’s work.
 - Middle paragraphs should focus on concrete projects, achievements, or relevant experiences.
 - End with a one-line statement of enthusiasm and the required sign-off.
 
 ### Important:
-- Only generate the **main body** of the letter (excluding the header or greeting).
-- Output must be **plain text** (no markdown formatting).
+
+- Only generate the main body of the letter (excluding the header or greeting).
+- Output must be plain text (no markdown).
 - Avoid repeating exact phrases from the CV unless highly relevant.
 - Avoid boilerplate or generic summaries.
 
